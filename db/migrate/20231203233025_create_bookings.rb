@@ -6,6 +6,7 @@ class CreateBookings < ActiveRecord::Migration[7.1]
       t.datetime :check_out
       t.belongs_to :space, null: false, foreign_key: true
       t.belongs_to :user, null: false, foreign_key: true
+      t.integer :amount
 
       t.timestamps
     end
