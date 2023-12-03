@@ -19,6 +19,7 @@ if ENV["RAILS_ENV"] == "production"
 end
 
 # Specifies the `worker_timeout` threshold that Puma will use to wait before
+workers ENV.fetch("WEB_CONCURRENCY") { 4 }
 # terminating a worker in development environments.
 worker_timeout 3600 if ENV.fetch("RAILS_ENV", "development") == "development"
 
@@ -30,6 +31,8 @@ environment ENV.fetch("RAILS_ENV") { "development" }
 
 # Specifies the `pidfile` that Puma will use.
 pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
+
+preload_app!
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart

@@ -79,6 +79,4 @@ test:
 #
 production:
   <<: *default
-  database: lounge_server_v2_production
-  username: lounge_server_v2
-  password: <%= ENV["LOUNGE_SERVER_V2_DATABASE_PASSWORD"] %>
+  url: <%= ENV['DATABASE_URL'] %>
