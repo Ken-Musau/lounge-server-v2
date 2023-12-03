@@ -55,7 +55,6 @@ class UsersController < ApplicationController
   def render_unprocessable_entity_response(invalid)
     render json: { errors: invalid.record.errors.full_messages  }, status: :unprocessable_entity
   end
-
     # Only allow a list of trusted parameters through.
     # def user_params
     #   params.require(:user).permit(:username, :first_name, :last_name, :email, :avatar, :password, :password_confirmation, :role, :contact)
