@@ -1,51 +1,55 @@
 class SpacesController < ApplicationController
-  before_action :set_space, only: %i[ show update destroy ]
+  rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
+  rescue_from ActiveRecord::RecordInvalid, with: :render_unprocessable_entity_response
+  # before_action :authorize
+  skip_before_action :authorized, only: [:index]
 
   # GET /spaces
   def index
-    @spaces = Space.all
-
-    render json: @spaces
+    render json: Space.all
   end
 
-  # GET /spaces/1
   def show
-    render json: @space
+    space = find_space
+    render json: space
   end
 
-  # POST /spaces
   def create
-    @space = Space.new(space_params)
-
-    if @space.save
-      render json: @space, status: :created, location: @space
-    else
-      render json: @space.errors, status: :unprocessable_entity
-    end
+    space =Space.create!(space_params)
+    render json: space, status: :created
   end
 
-  # PATCH/PUT /spaces/1
   def update
-    if @space.update(space_params)
-      render json: @space
-    else
-      render json: @space.errors, status: :unprocessable_entity
-    end
+    space = find_space
+    space.update!(space_params)
+    render json: space
   end
 
-  # DELETE /spaces/1
   def destroy
-    @space.destroy!
+    space = find_space
+    space.destroy
+    head :no_content
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_space
-      @space = Space.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def space_params
-      params.require(:space).permit(:name, :location, :price, :status, :image, :description, :contact, :features, :user_id)
-    end
+  def find_space
+    Space.find(params[:id])
+  end
+
+  def space_params
+    params.permit(:name, :location, :price, :status, :image, :description, :contact, :features, :user_id)
+  end
+
+  def render_not_found
+    render json: { error: "Space not found"}, status: :not_found
+  end
+
+  def render_unprocessable_entity_response(invalid)
+    render json: { errors: invalid.record.errors.full_messages  }, status: :unprocessable_entity
+  end
+
+  # def authorize
+  #   return render json: { error: "Not Authorized" }, status: :unauthorized unless session.include? :user_id
+  # end
 end

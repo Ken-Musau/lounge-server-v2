@@ -1,51 +1,49 @@
 class ReviewsController < ApplicationController
-  before_action :set_review, only: %i[ show update destroy ]
+  rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
+  rescue_from ActiveRecord::RecordInvalid, with: :render_unprocessable_entity_response
 
-  # GET /reviews
   def index
-    @reviews = Review.all
-
-    render json: @reviews
+    reviews = Review.all
+    render json: reviews
   end
 
-  # GET /reviews/1
   def show
-    render json: @review
+    review = find_review
+    render json: review
   end
 
-  # POST /reviews
   def create
-    @review = Review.new(review_params)
-
-    if @review.save
-      render json: @review, status: :created, location: @review
-    else
-      render json: @review.errors, status: :unprocessable_entity
-    end
+   review = Review.create!(review_params)
+   render json: review, status: :created
   end
 
-  # PATCH/PUT /reviews/1
   def update
-    if @review.update(review_params)
-      render json: @review
-    else
-      render json: @review.errors, status: :unprocessable_entity
-    end
+    review = find_review
+    review.update!(review_params)
+    render json: :review
   end
 
-  # DELETE /reviews/1
   def destroy
-    @review.destroy!
+    review = find_review
+    review.destroy
+    head :no_content
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_review
-      @review = Review.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def review_params
-      params.require(:review).permit(:comment, :rating, :space_id, :user_id)
-    end
+  def find_review
+    Review.find(params[:id])
+  end
+
+  def review_params
+    params.require(:review).permit(:username, :rating, :space_id, :user_id, :comment)
+  end
+
+  def render_not_found
+    render json: { error: "review not found"}, status: :not_found
+  end
+
+  def render_unprocessable_entity_response(invalid)
+    render json: { errors: invalid.record.errors.full_messages  }, status: :unprocessable_entity
+  end
 end
